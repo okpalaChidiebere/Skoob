@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.android.skoob.R;
@@ -24,10 +25,11 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
@@ -43,8 +45,16 @@ public class PostFragment extends Fragment {
     // Constants
     public static final String TAG = PostFragment.class.getSimpleName();
     private static final int PLACE_PICKER_REQUEST = 1;
+    private static final Pattern ONLY_DIGIT_PATTERN = Pattern.compile("^\\d+$");//regex for only digit /^\d+$/
 
-    private TextInputEditText mLocationEditText;
+    private TextInputLayout mTextInputBookName;
+    private TextInputLayout mTextInputIsbnNumber;
+    private TextInputLayout mTextInputPrice;
+    private TextInputLayout mTextInputDepartment;
+    private TextInputLayout mTextInputSubject;
+    private TextInputLayout mTextInputLocation;
+    private Button mSubmitButton;
+
     private List<Place.Field> fields;
 
     public PostFragment() {
@@ -64,11 +74,25 @@ public class PostFragment extends Fragment {
         initializePlace();
         fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS);
 
-        mLocationEditText = rootView.findViewById(R.id.locationEditText);
-        mLocationEditText.setOnClickListener(new View.OnClickListener() {
+        mTextInputBookName = rootView.findViewById(R.id.tv_bookName);
+        mTextInputIsbnNumber = rootView.findViewById(R.id.tv_IsbnNumber);
+        mTextInputPrice = rootView.findViewById(R.id.tv_Price);
+        mTextInputDepartment = rootView.findViewById(R.id.tv_Department);
+        mTextInputSubject = rootView.findViewById(R.id.tv_Subject);
+        mTextInputLocation = rootView.findViewById(R.id.tv_Location);
+        mSubmitButton = rootView.findViewById(R.id.tv_submit_button);
+
+        mTextInputLocation.getEditText().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onAddPlaceClicked();
+            }
+        });
+
+        mSubmitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                confirmInput();
             }
         });
 
@@ -110,7 +134,7 @@ public class PostFragment extends Fragment {
                     String placeAddress = place.getAddress();
                     String placeID = place.getId();
                     Log.i(TAG, "PlaceName: " + placeName + ", " + "PlaceAddress: " + placeAddress + placeID);
-                    mLocationEditText.setText(placeAddress);
+                    mTextInputLocation.getEditText().setText(placeAddress);
 
                     //TODO Encrypt the placeID and store it in the fireBase
                     /*We only store the placeID because google terms and conditions require us not to store
@@ -126,5 +150,107 @@ public class PostFragment extends Fragment {
             }
         }
 
+    }
+
+    private void confirmInput() {
+
+        if (!validateBookName() | !validateIsbnNumber() | !validatePrice()
+                | !validateDepartment() | !validateSubject() | !validateLocation()){
+            return;
+        }
+        String input = "BookName: " + mTextInputBookName.getEditText().getText().toString().trim();
+        input += "\n";
+        input += "ISBN: " + mTextInputIsbnNumber.getEditText().getText().toString().trim();
+        input += "\n";
+        input += "Price: " + mTextInputPrice.getEditText().getText().toString().trim();
+        input += "\n";
+        input += "Department: " + mTextInputDepartment.getEditText().getText().toString().trim();
+        input += "\n";
+        input += "Subject: " + mTextInputSubject.getEditText().getText().toString().trim();
+        input += "\n";
+        input += "Location: " + mTextInputLocation.getEditText().getText().toString().trim();
+
+        Toast.makeText(getContext(), input, Toast.LENGTH_LONG).show();
+    }
+
+    private boolean validateBookName() {
+        String bookNameInput = mTextInputBookName.getEditText().getText().toString().trim();
+        if (bookNameInput.isEmpty()) {
+            mTextInputBookName.setError("Field can't be empty");
+            return false;
+        }else if(ONLY_DIGIT_PATTERN.matcher(bookNameInput).matches()){
+            mTextInputBookName.setError("Field can't be only Digit");
+            return false;
+        }else {
+            mTextInputBookName.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validateIsbnNumber(){
+        String isbnInput = mTextInputIsbnNumber.getEditText().getText().toString().trim();
+        if (isbnInput.isEmpty()) {
+            mTextInputIsbnNumber.setError("Field can't be empty");
+            return false;
+        }else if(!ONLY_DIGIT_PATTERN.matcher(isbnInput).matches()){
+            mTextInputIsbnNumber.setError("Field must be digit only");
+            return false;
+        }else {
+            mTextInputIsbnNumber.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validatePrice(){
+        String priceInput = mTextInputPrice.getEditText().getText().toString().trim();
+        if (priceInput.isEmpty()) {
+            mTextInputPrice.setError("Field can't be empty");
+            return false;
+        }else if(!ONLY_DIGIT_PATTERN.matcher(priceInput).matches()){
+            mTextInputPrice.setError("Field must be digit only");
+            return false;
+        }else {
+            mTextInputPrice.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validateDepartment() {
+        String departmentInput = mTextInputDepartment.getEditText().getText().toString().trim();
+        if (departmentInput.isEmpty()) {
+            mTextInputDepartment.setError("Field can't be empty");
+            return false;
+        }else if(ONLY_DIGIT_PATTERN.matcher(departmentInput).matches()){
+            mTextInputDepartment.setError("Field can't be only Digit");
+            return false;
+        }else {
+            mTextInputDepartment.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validateSubject() {
+        String subjectInput = mTextInputSubject.getEditText().getText().toString().trim();
+        if (subjectInput.isEmpty()) {
+            mTextInputSubject.setError("Field can't be empty");
+            return false;
+        }else if(ONLY_DIGIT_PATTERN.matcher(subjectInput).matches()){
+            mTextInputSubject.setError("Field can't be only Digit");
+            return false;
+        }else {
+            mTextInputSubject.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validateLocation() {
+        String locationInput = mTextInputLocation.getEditText().getText().toString().trim();
+        if (locationInput.isEmpty()) {
+            mTextInputLocation.setError("Field can't be empty");
+            return false;
+        }else {
+            mTextInputLocation.setError(null);
+            return true;
+        }
     }
 }
