@@ -1,19 +1,25 @@
 package com.example.android.skoob.view;
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.skoob.R;
@@ -25,8 +31,10 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -40,12 +48,13 @@ import static android.app.Activity.RESULT_OK;
  * Use the {@link PostFragment#getInstance} factory method to
  * create an instance of this fragment.
  */
-public class PostFragment extends Fragment {
+public class PostFragment extends Fragment implements BookImageAdapter.BookImageAdapterOnLongClickHandler{
 
     // Constants
     public static final String TAG = PostFragment.class.getSimpleName();
     private static final int PLACE_PICKER_REQUEST = 1;
     private static final Pattern ONLY_DIGIT_PATTERN = Pattern.compile("^\\d+$");//regex for only digit /^\d+$/
+    private static final int RC_PHOTO_PICKER = 2; //a flag to know when the user is picking a photo
 
     private TextInputLayout mTextInputBookName;
     private TextInputLayout mTextInputIsbnNumber;
@@ -53,9 +62,14 @@ public class PostFragment extends Fragment {
     private TextInputLayout mTextInputDepartment;
     private TextInputLayout mTextInputSubject;
     private TextInputLayout mTextInputLocation;
-    private Button mSubmitButton;
+    private TextView mImageHint;
+    private Button mSubmitButton, mAddImage;
 
     private List<Place.Field> fields;
+    private List<Uri> mBookImageList = new ArrayList<>();
+    private BookImageAdapter mAdapter;
+    private RecyclerView mRecyclerView;
+    private BookImageAdapter.BookImageAdapterOnLongClickHandler longClickHandler;
 
     public PostFragment() {
         // Required empty public constructor
@@ -74,6 +88,15 @@ public class PostFragment extends Fragment {
         initializePlace();
         fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS);
 
+        longClickHandler = this;
+        // Set up the recycler view
+        mRecyclerView = rootView.findViewById(R.id.tv_recyclerView_images);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),3));
+        mAdapter = new BookImageAdapter( null, longClickHandler);
+        mRecyclerView.setAdapter(mAdapter);
+        // End set up the recycler view
+
+
         mTextInputBookName = rootView.findViewById(R.id.tv_bookName);
         mTextInputIsbnNumber = rootView.findViewById(R.id.tv_IsbnNumber);
         mTextInputPrice = rootView.findViewById(R.id.tv_Price);
@@ -81,6 +104,8 @@ public class PostFragment extends Fragment {
         mTextInputSubject = rootView.findViewById(R.id.tv_Subject);
         mTextInputLocation = rootView.findViewById(R.id.tv_Location);
         mSubmitButton = rootView.findViewById(R.id.tv_submit_button);
+        mAddImage = rootView.findViewById(R.id.tv_uploadImage_button);
+        mImageHint = rootView.findViewById(R.id.tv_imageSideNote);
 
         mTextInputLocation.getEditText().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,6 +118,13 @@ public class PostFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 confirmInput();
+            }
+        });
+
+        mAddImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openFileChooser();
             }
         });
 
@@ -147,6 +179,13 @@ public class PostFragment extends Fragment {
                     break;
                 case RESULT_CANCELED:
                     break;
+            }
+        }else if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
+            Uri selectedImageUri = data.getData(); // <FILENAME> eg content://local_images/filename4
+            mBookImageList.add(selectedImageUri);
+            mAdapter.swapBookImageList(mBookImageList);
+            if(mBookImageList != null){
+                mImageHint.setVisibility(View.VISIBLE);
             }
         }
 
@@ -252,5 +291,40 @@ public class PostFragment extends Fragment {
             mTextInputLocation.setError(null);
             return true;
         }
+    }
+
+    private void openFileChooser(){
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/jpeg");
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+        startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
+    }
+
+    @Override
+    public void onLongClicked(final int imageAdapterPosition) {
+
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(getContext());
+        builder1.setMessage("Do you want to remove image");
+        builder1.setCancelable(true);
+
+        builder1.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        mBookImageList.remove(imageAdapterPosition);
+
+                        if(mBookImageList.size() == 0){
+                            mImageHint.setVisibility(View.GONE);
+                        }
+
+                        mAdapter.swapBookImageList(mBookImageList);
+                        Snackbar.make(getView(), "Image removed", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
+                });
+        builder1.setNegativeButton(android.R.string.no, null);
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
     }
 }

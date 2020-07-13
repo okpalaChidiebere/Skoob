@@ -11,6 +11,37 @@
         android:orientation="vertical"
         tools:context=".view.PostFragment">
 
+        <TextView
+            android:id="@+id/tv_imageSideNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Long press on image to delete"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="12dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tv_recyclerView_images"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintStart_toEndOf="@+id/guideline"
+            app:layout_constraintTop_toBottomOf="@+id/tv_imageSideNote"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_uploadImage_button"
+            android:text="Add Image"
+            app:layout_constraintStart_toEndOf="@+id/guideline"
+            app:layout_constraintTop_toBottomOf="@+id/tv_recyclerView_images"/>
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tv_bookName"
             android:layout_width="match_parent"
@@ -20,7 +51,7 @@
             android:layout_marginTop="12dp"
             app:errorEnabled="true"
             app:layout_constraintStart_toEndOf="@+id/guideline"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toBottomOf="@+id/tv_uploadImage_button">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
