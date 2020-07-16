@@ -11,4 +11,9 @@
     <string name="need_location_permission_message">You need to enable location permissions first</string>
     <string name="location_permissions_granted_message">Location Permissions Granted</string>
 
+    <string name="signIn_message">Sign In</string>
+    <string name="signOut_message">Sign Out</string>
+    <string name="auth_info_messageIntro">You are currently signed in as</string>
+    <string name="auth_info_message">You are not signed in</string>
+
 </resources>

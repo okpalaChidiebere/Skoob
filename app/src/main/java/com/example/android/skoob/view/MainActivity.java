@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
@@ -30,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SettingsFragment.settingsAuthButtonOnClickListener{
 
     public static final int RC_SIGN_IN = 1; //it is a flag for when we come back to starting the activity for result
     private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 111;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
     Fragment selectedFragment, fragmentToLoad;
     MenuItem temp_menuItem;
-    private String cityName;
+    private String cityName, mUserEmail;
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         cityName = "";
+        mUserEmail = "";
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -93,7 +95,9 @@ public class MainActivity extends AppCompatActivity {
                         fragmentToLoad = AccountFragment.getInstance();
                         break;
                     case R.id.action_settings:
-                        selectedFragment = SettingsFragment.getInstance();
+                        SettingsFragment settingsFragment = new SettingsFragment();
+                        settingsFragment.setUserEmail(mUserEmail);
+                        selectedFragment = settingsFragment;
                         temp_menuItem.setChecked(true);
                         break;
 
@@ -204,12 +208,47 @@ public class MainActivity extends AppCompatActivity {
                 // Sign-in succeeded, set up the UI
                 //Here this user ust have signed out of our app or is signing up for the first time
                 temp_menuItem.setChecked(true);
+                FirebaseUser user = mFirebaseAuth.getCurrentUser();
+                mUserEmail = user.getEmail();
+
                 Toast.makeText(this, "You're now signed in. Welcome to SKOOB.", Toast.LENGTH_SHORT).show();
+
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.main_frame,fragmentToLoad);
-                transaction.commit();
+
+                Fragment f = getVisibleFragment();
+                /*There are two screens that are visible to the user only when they have not log in.
+                HomeScreen and Settings screen. We are trying to determine which fragment to load next
+                after login based on the visible fragment*/
+                if(f instanceof HomeFragment){
+                    transaction.replace(R.id.main_frame, fragmentToLoad);
+                    transaction.commit();
+                }else{
+                    SettingsFragment settingsFragment = new SettingsFragment();
+                    settingsFragment.setUserEmail(mUserEmail);
+                    fragmentToLoad = settingsFragment;
+                    transaction.replace(R.id.main_frame, fragmentToLoad);
+                    transaction.commit();
+                }
             }
+        }else if (resultCode == RESULT_CANCELED) {
+            // Sign in was canceled by the user, finish the activity
+            finish(); //this line was to prevent the Auth UI from appearing twice
         }
+    }
+
+    /*Returns the fragment that is loaded in UI
+    * FYI: this functions will not work properly in a Two pane UI where you have two fragments visible at once
+    * You will need to modify the code a bit to return two fragments visible*/
+    public Fragment getVisibleFragment(){
+        FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
+        List<Fragment> fragments = fragmentManager.getFragments();
+        //if(fragments != null){
+            for(Fragment fragment : fragments){
+                if(fragment != null && fragment.isVisible())
+                    return fragment;
+            }
+        //}
+        return null;
     }
 
     private void checkLogin(){
@@ -220,6 +259,7 @@ public class MainActivity extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     //user is signed in. Here we know the user had sign in once and never signed out of our app
+                    mUserEmail = user.getEmail();
                     temp_menuItem.setChecked(true);
                     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.main_frame,fragmentToLoad);
@@ -243,5 +283,30 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+    }
+
+    @Override
+    public void onSettingsAuthButtonSelected() {
+
+        if(!mUserEmail.isEmpty()) {
+            mFirebaseAuth.signOut(); //close the session
+
+            if (mAuthStateListener != null) {
+                mFirebaseAuth.removeAuthStateListener(mAuthStateListener); //remove the FireBase login screen
+            }
+            mUserEmail = "";
+
+            //Update the setting s fragment UI
+            SettingsFragment settingsFragment = new SettingsFragment();
+            settingsFragment.setUserEmail(mUserEmail);
+            selectedFragment = settingsFragment; //initialize the last selected fragment
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.main_frame, settingsFragment);
+            transaction.commit();
+        }else{
+
+            mFirebaseAuth.addAuthStateListener(mAuthStateListener); //load back up thew login screen
+        }
+
     }
 }
