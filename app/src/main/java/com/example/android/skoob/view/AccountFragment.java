@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.view.LayoutInflater;
@@ -79,7 +80,7 @@ public class AccountFragment extends Fragment {
     }
 
     private void setUpViewPager(ViewPager viewPager){
-        SectionFragmentAdapter adapter = new SectionFragmentAdapter(getChildFragmentManager());
+        SectionFragmentAdapter adapter = new SectionFragmentAdapter(getChildFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
         adapter.addFragment(new ListingsFragment(), getString(R.string.listings_category));
         adapter.addFragment(new FavouritesFragment(), getString(R.string.favorites_category));

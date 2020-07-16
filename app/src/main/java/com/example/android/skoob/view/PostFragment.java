@@ -4,9 +4,12 @@ package com.example.android.skoob.view;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
@@ -23,9 +26,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.skoob.R;
+import com.example.android.skoob.model.Book;
 import com.example.android.skoob.utils.Constants;
 import com.google.android.gms.common.api.Status;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
@@ -33,10 +41,16 @@ import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import static android.app.Activity.RESULT_CANCELED;
@@ -48,7 +62,9 @@ import static android.app.Activity.RESULT_OK;
  * Use the {@link PostFragment#getInstance} factory method to
  * create an instance of this fragment.
  */
-public class PostFragment extends Fragment implements BookImageAdapter.BookImageAdapterOnLongClickHandler{
+public class PostFragment extends Fragment implements
+        setImageUrlListener,
+        BookImageAdapter.BookImageAdapterOnLongClickHandler{
 
     // Constants
     public static final String TAG = PostFragment.class.getSimpleName();
@@ -70,6 +86,18 @@ public class PostFragment extends Fragment implements BookImageAdapter.BookImage
     private BookImageAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private BookImageAdapter.BookImageAdapterOnLongClickHandler longClickHandler;
+    private String UserEmail, mPlaceCity;
+    private List<String> mBookImageToUpload = new ArrayList<>(); //use to store final list of imageUrls from firebase Storage
+
+    // Firebase instance variables
+    private FirebaseDatabase mFirebaseDatabase; //entry point for your app to access the database
+    private DatabaseReference mBooksForSaleDatabaseReference; //represent s a specific part of the Firebase database
+    private FirebaseStorage mFirebaseStorage;
+    private StorageReference mBooksPhotosStorageReference;
+
+    //this listener will be used to know when we are
+    // done uploading book image to storage before we store book datashot in database
+    private setImageUrlListener mSetImageCallBack;
 
     public PostFragment() {
         // Required empty public constructor
@@ -86,7 +114,7 @@ public class PostFragment extends Fragment implements BookImageAdapter.BookImage
         View rootView = inflater.inflate(R.layout.fragment_post, container, false);
 
         initializePlace();
-        fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS);
+        fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
 
         longClickHandler = this;
         // Set up the recycler view
@@ -107,7 +135,17 @@ public class PostFragment extends Fragment implements BookImageAdapter.BookImage
         mAddImage = rootView.findViewById(R.id.tv_uploadImage_button);
         mImageHint = rootView.findViewById(R.id.tv_imageSideNote);
 
-        mTextInputLocation.getEditText().setOnClickListener(new View.OnClickListener() {
+        MainActivity activity = (MainActivity) getActivity();
+        UserEmail = activity.getUserEmail();
+
+        // Initialize Firebase components
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mFirebaseStorage = FirebaseStorage.getInstance();
+        mBooksForSaleDatabaseReference = mFirebaseDatabase.getReference().child("booksForSale"); //getting the root node messages part of our database
+        mBooksPhotosStorageReference = mFirebaseStorage.getReference().child("book_photos"); //getting the location 'book_photos' in our Firebase storage console
+        mSetImageCallBack = this;
+
+                mTextInputLocation.getEditText().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onAddPlaceClicked();
@@ -165,6 +203,8 @@ public class PostFragment extends Fragment implements BookImageAdapter.BookImage
                     String placeName = place.getName();
                     String placeAddress = place.getAddress();
                     String placeID = place.getId();
+                    LatLng latLng = place.getLatLng();
+                    fetchCityFromPlaceLatLong(latLng);
                     Log.i(TAG, "PlaceName: " + placeName + ", " + "PlaceAddress: " + placeAddress + placeID);
                     mTextInputLocation.getEditText().setText(placeAddress);
 
@@ -210,6 +250,8 @@ public class PostFragment extends Fragment implements BookImageAdapter.BookImage
         input += "Location: " + mTextInputLocation.getEditText().getText().toString().trim();
 
         Toast.makeText(getContext(), input, Toast.LENGTH_LONG).show();
+        uploadBookToFirebase();
+
     }
 
     private boolean validateBookName() {
@@ -326,5 +368,85 @@ public class PostFragment extends Fragment implements BookImageAdapter.BookImage
 
         AlertDialog alert11 = builder1.create();
         alert11.show();
+    }
+
+    private void uploadBookToFirebase(){
+
+        for (int i =0 ; i < mBookImageList.size(); i++) {
+
+            final StorageReference photoRef = mBooksPhotosStorageReference.child(mBookImageList.get(i).getLastPathSegment());
+            // Upload file to Firebase Storage
+            UploadTask uploadTask = photoRef.putFile(mBookImageList.get(i));
+
+            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+                    // Continue with the task to get the download URL
+                    return photoRef.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        if (downloadUri != null) {
+
+                            // When the image has successfully uploaded, we get its download URL
+                            String photoStringLink = downloadUri.toString();
+                            mSetImageCallBack.onSetImageUrlListener(photoStringLink);
+                        }
+
+                    } else {
+                        // Handle failures
+                        // ...
+                    }
+                }
+            });
+        }
+
+    }
+
+    @Override
+    public void onSetImageUrlListener(String imageUrl) {
+        mBookImageToUpload.add(imageUrl); //add imageUrl
+
+        //When are are done uploading books images to file storage and getting their related url,
+        // we can now upload book info to database
+        if(mBookImageToUpload.size() == mBookImageList.size()){
+            int tempPrice, tempIsbnNumber;
+            tempPrice = Integer.parseInt(mTextInputPrice.getEditText().getText().toString().trim());
+            tempIsbnNumber = Integer.parseInt(mTextInputIsbnNumber.getEditText().getText().toString().trim());
+
+            Book bookForSale = new Book(mTextInputBookName.getEditText().getText().toString().trim(),
+                    tempIsbnNumber,
+                    tempPrice,
+                    mTextInputDepartment.getEditText().getText().toString().trim(),
+                    mTextInputSubject.getEditText().getText().toString().trim(),
+                    mBookImageToUpload,
+                    UserEmail,
+                    mTextInputLocation.getEditText().getText().toString().trim(),
+                    mPlaceCity);
+            //this triggers the childEventListener, so our screen will be update with new data from firebase console database
+            mBooksForSaleDatabaseReference.push().setValue(bookForSale);
+            Toast.makeText(getContext(), "Successfully posted!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void fetchCityFromPlaceLatLong(LatLng latLng){
+
+        Geocoder gcd = new Geocoder(getContext(), Locale.getDefault());
+        List<Address> addresses;
+
+        try{
+            addresses = gcd.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            mPlaceCity = addresses.get(0).getLocality(); //get the city
+        }catch(Exception exception){
+            mPlaceCity = exception.getMessage(); //assign error message to display
+        }
+
+
     }
 }

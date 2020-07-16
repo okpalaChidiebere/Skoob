@@ -12,8 +12,8 @@ public class SectionFragmentAdapter extends FragmentPagerAdapter {
     private List<Fragment> fragmentList = new ArrayList<>();
     private List<String> titleList = new ArrayList<>();
 
-    public SectionFragmentAdapter(FragmentManager fm){
-        super(fm);
+    public SectionFragmentAdapter(FragmentManager fm, int behaviour){
+        super(fm, behaviour);
     }
 
     @Override

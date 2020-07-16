@@ -11,6 +11,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true  //i exceeded the number of classes in my singleDex file, so i had to allow for more space
     }
     buildTypes {
         release {
@@ -46,4 +47,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:19.3.2'
     implementation 'com.firebaseui:firebase-ui-auth:6.2.1' //FireBase authentication UI
     implementation 'com.google.firebase:firebase-analytics:17.4.4'
+    //Realtime database
+    implementation 'com.google.firebase:firebase-database:19.3.1'
+    //Firebase Storage
+    implementation 'com.google.firebase:firebase-storage:19.1.1'
 }

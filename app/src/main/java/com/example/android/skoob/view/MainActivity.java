@@ -309,4 +309,8 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
         }
 
     }
+
+    public String getUserEmail(){
+        return mUserEmail;
+    }
 }
