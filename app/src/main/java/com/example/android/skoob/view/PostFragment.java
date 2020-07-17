@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,6 +81,7 @@ public class PostFragment extends Fragment implements
     private TextInputLayout mTextInputLocation;
     private TextView mImageHint;
     private Button mSubmitButton, mAddImage;
+    private ProgressBar mProgressBar;
 
     private List<Place.Field> fields;
     private List<Uri> mBookImageList = new ArrayList<>();
@@ -134,6 +136,7 @@ public class PostFragment extends Fragment implements
         mSubmitButton = rootView.findViewById(R.id.tv_submit_button);
         mAddImage = rootView.findViewById(R.id.tv_uploadImage_button);
         mImageHint = rootView.findViewById(R.id.tv_imageSideNote);
+        mProgressBar = rootView.findViewById(R.id.tv_post_pb_loading_indicator);
 
         MainActivity activity = (MainActivity) getActivity();
         UserEmail = activity.getUserEmail();
@@ -155,6 +158,8 @@ public class PostFragment extends Fragment implements
         mSubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                mSubmitButton.setEnabled(false);
                 confirmInput();
             }
         });
@@ -234,22 +239,11 @@ public class PostFragment extends Fragment implements
     private void confirmInput() {
 
         if (!validateBookName() | !validateIsbnNumber() | !validatePrice()
-                | !validateDepartment() | !validateSubject() | !validateLocation()){
+                | !validateDepartment() | !validateSubject() | !validateLocation() | !validateBookPhotos()){
+            mProgressBar.setVisibility(View.GONE);
+            mSubmitButton.setEnabled(true);
             return;
         }
-        String input = "BookName: " + mTextInputBookName.getEditText().getText().toString().trim();
-        input += "\n";
-        input += "ISBN: " + mTextInputIsbnNumber.getEditText().getText().toString().trim();
-        input += "\n";
-        input += "Price: " + mTextInputPrice.getEditText().getText().toString().trim();
-        input += "\n";
-        input += "Department: " + mTextInputDepartment.getEditText().getText().toString().trim();
-        input += "\n";
-        input += "Subject: " + mTextInputSubject.getEditText().getText().toString().trim();
-        input += "\n";
-        input += "Location: " + mTextInputLocation.getEditText().getText().toString().trim();
-
-        Toast.makeText(getContext(), input, Toast.LENGTH_LONG).show();
         uploadBookToFirebase();
 
     }
@@ -333,6 +327,34 @@ public class PostFragment extends Fragment implements
             mTextInputLocation.setError(null);
             return true;
         }
+    }
+
+    private boolean validateBookPhotos(){
+        if(mBookImageList.size() == 0){
+            mImageHint.setVisibility(View.VISIBLE);
+            mImageHint.setError(getString(R.string.postImage_error)); //this will not really show, but a a read icon will pop up
+            mImageHint.setText(getString(R.string.postImage_error));
+            return false;
+        }else{
+            mImageHint.setText(getString(R.string.deleteImage_hint));
+            mImageHint.setError(null); //remove the red icon
+            return true;
+        }
+    }
+
+    private void emptyPostForm() {
+
+        mTextInputBookName.getEditText().setText("");
+        mTextInputIsbnNumber.getEditText().setText("");
+        mTextInputPrice.getEditText().setText("");
+        mTextInputDepartment.getEditText().setText("");
+        mTextInputSubject.getEditText().setText("");
+        mTextInputLocation.getEditText().setText("");
+        mPlaceCity="";
+        mBookImageList = new ArrayList<>();
+        mAdapter.swapBookImageList(mBookImageList);
+        mImageHint.setVisibility(View.GONE);
+        mSubmitButton.setEnabled(true);
     }
 
     private void openFileChooser(){
@@ -432,6 +454,8 @@ public class PostFragment extends Fragment implements
             //this triggers the childEventListener, so our screen will be update with new data from firebase console database
             mBooksForSaleDatabaseReference.push().setValue(bookForSale);
             Toast.makeText(getContext(), "Successfully posted!", Toast.LENGTH_LONG).show();
+            mProgressBar.setVisibility(View.GONE);
+            emptyPostForm();
         }
     }
 

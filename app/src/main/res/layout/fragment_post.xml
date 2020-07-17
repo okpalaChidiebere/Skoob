@@ -15,10 +15,11 @@
             android:id="@+id/tv_imageSideNote"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Long press on image to delete"
+            android:text="@string/deleteImage_hint"
             android:layout_marginStart="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="12dp"
+            app:errorEnabled="true"
             android:visibility="gone"
             app:layout_constraintStart_toEndOf="@+id/guideline"
             app:layout_constraintTop_toTopOf="parent"
@@ -179,6 +180,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="left" />
+
+        <ProgressBar
+            android:id="@+id/tv_post_pb_loading_indicator"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

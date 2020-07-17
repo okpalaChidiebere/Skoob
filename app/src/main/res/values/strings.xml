@@ -16,4 +16,7 @@
     <string name="auth_info_messageIntro">You are currently signed in as</string>
     <string name="auth_info_message">You are not signed in</string>
 
+    <string name="postImage_error">Please upload an image</string>
+    <string name="deleteImage_hint">Long press on image to delete</string>
+
 </resources>
