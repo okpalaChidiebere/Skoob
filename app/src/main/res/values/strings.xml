@@ -19,4 +19,6 @@
     <string name="postImage_error">Please upload an image</string>
     <string name="deleteImage_hint">Long press on image to delete</string>
 
+    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+
 </resources>

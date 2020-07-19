@@ -15,6 +15,10 @@ public class Book {
     private String placeAddress; //shown in the detail page
     private String place; //used to sort the books based on location by buyer
 
+    //Firebase requires your POJO have to have an empty constructor
+    public Book(){
+    }
+
     public Book(String bookName, int isbnNumber, int price, String department, String subject,
                 List<String> photoUrl, String emailOfSeller, String placeAddress, String place) {
         this.bookName = bookName;
