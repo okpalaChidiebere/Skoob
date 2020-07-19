@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.example.android.skoob.R;
+import com.example.android.skoob.model.Book;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -26,7 +27,14 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -47,9 +55,15 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
     Fragment selectedFragment, fragmentToLoad;
     MenuItem temp_menuItem;
     private String cityName, mUserEmail;
+    private List<Book> mBooks = new ArrayList<>();
 
+    // Firebase instance variables
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
+    private FirebaseDatabase mFirebaseDatabase; //entry point for your app to access the database
+    private DatabaseReference mBooksForSaleDatabaseReference; //represent s a specific part of the Firebase database
+    private ChildEventListener mChildEventListener;
+    private ValueEventListener mValueEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
                     case R.id.action_home:
                         HomeFragment homeFragment = new HomeFragment();
                         homeFragment.setUserLocation(cityName);
+                        homeFragment.setBooksData(mBooks);
                         selectedFragment = homeFragment;
                         temp_menuItem.setChecked(true);
                         break;
@@ -112,6 +127,33 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
             }
         });
 
+        //mDisplayBooksListener = this;
+        // Initialize Firebase components
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mBooksForSaleDatabaseReference = mFirebaseDatabase.getReference().child("booksForSale"); //getting the root node messages part of our database
+
+
+        mValueEventListener = new ValueEventListener() {
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //AT this point, we are done loading the data
+                setDefaultFragment(); //now we can load the home page fragment
+            }
+
+            public void onCancelled(DatabaseError databaseError) { }
+        };
+        mChildEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Book bookForSale = dataSnapshot.getValue(Book.class); //the data of the POJO should match the EXACT name in of the key values in the database object
+                mBooks.add(bookForSale);
+            }
+
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+            public void onCancelled(DatabaseError databaseError) {}
+        };
+
     }
 
     private void setDefaultFragment(){
@@ -119,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
         selectedFragment = HomeFragment.getInstance();
         HomeFragment homeFragment = new HomeFragment();
         homeFragment.setUserLocation(cityName);
+        homeFragment.setBooksData(mBooks);
         transaction.replace(R.id.main_frame, homeFragment);
         transaction.commit();
     }
@@ -180,7 +223,9 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
                             location.setLatitude(latitude);
                             location.setLongitude(longitude);
                             fetchCityFromLatLong(location);
-                            setDefaultFragment();
+                            //When we are done getting the current user location, we now initialize event listener
+                            //for firebase to get the list of books for sale from database
+                            AddListenersForFirebase();
                         }
                     }
                 }, Looper.getMainLooper());
@@ -312,5 +357,10 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
 
     public String getUserEmail(){
         return mUserEmail;
+    }
+
+    public void AddListenersForFirebase(){
+        mBooksForSaleDatabaseReference.addChildEventListener(mChildEventListener);
+        mBooksForSaleDatabaseReference.addListenerForSingleValueEvent(mValueEventListener);
     }
 }

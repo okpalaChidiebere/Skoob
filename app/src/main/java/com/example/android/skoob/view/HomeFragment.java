@@ -17,14 +17,10 @@ import com.example.android.skoob.R;
 import com.example.android.skoob.model.Book;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -42,11 +38,6 @@ public class HomeFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private List<Book> mBooks = new ArrayList<>();
 
-    // Firebase instance variables
-    private FirebaseDatabase mFirebaseDatabase; //entry point for your app to access the database
-    private DatabaseReference mBooksForSaleDatabaseReference; //represent s a specific part of the Firebase database
-    private ChildEventListener mChildEventListener;
-    private ValueEventListener mValueEventListener;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -58,6 +49,10 @@ public class HomeFragment extends Fragment {
 
     public void setUserLocation(String loc){
         mUserLocation = loc;
+    }
+
+    public void setBooksData(List<Book> books){
+        mBooks = books;
     }
 
 
@@ -83,40 +78,37 @@ public class HomeFragment extends Fragment {
         mAdView.loadAd(adRequest);
         //end banner ad set up
 
-        // Initialize Firebase components
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mBooksForSaleDatabaseReference = mFirebaseDatabase.getReference().child("booksForSale"); //getting the root node messages part of our database
-
         mTextCity.setText(mUserLocation);
         mProgressBar.setVisibility(View.VISIBLE);
 
-        mValueEventListener = new ValueEventListener() {
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //System.out.println("We're done loading the initial "+dataSnapshot.getChildrenCount()+" items");
-                mProgressBar.setVisibility(View.GONE);
-            }
 
-            public void onCancelled(DatabaseError databaseError) { }
-        };
-        mChildEventListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Book bookForSale = dataSnapshot.getValue(Book.class); //the data of the POJO should match the EXACT name in of the key values in the database object
-                mBooks.add(bookForSale);
-                mBookAdapter.setData(mBooks);
-            }
-
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
-            public void onCancelled(DatabaseError databaseError) {}
-        };
-        mBooksForSaleDatabaseReference.addChildEventListener(mChildEventListener);
-        mBooksForSaleDatabaseReference.addListenerForSingleValueEvent(mValueEventListener);
+        if(mBooks !=null && !mBooks.isEmpty()){
+            mProgressBar.setVisibility(View.GONE);
+            List<Book> tempBooks = sortBooks(mBooks); //sort the list first
+            mBookAdapter.setData(tempBooks); //load the adapter data with sorted list
+        }else{
+           //No books found in database
+            mBookAdapter.setData(null);
+        }
 
         return rootView;
 
     }
 
+    //This function returns the list of books, with the book for sale that has the current user location in it FIRST
+    private List<Book> sortBooks(List<Book> books){
 
+        Collections.sort(books, new Comparator<Book>() {
+            final String PREFIX = mUserLocation;
+
+            @Override
+            public int compare(Book a, Book b) {
+                if (a.getPlace().contains(PREFIX) && b.getPlace().contains(PREFIX)) return a.getPlace().compareTo(b.getPlace());
+                if (a.getPlace().contains(PREFIX) && !b.getPlace().contains(PREFIX)) return -1;
+                if (!a.getPlace().contains(PREFIX) && b.getPlace().contains(PREFIX)) return 1;
+                return 0;
+            }
+        });
+        return books;
+    }
 }
