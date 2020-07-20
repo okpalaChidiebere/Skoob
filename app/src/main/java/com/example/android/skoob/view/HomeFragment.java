@@ -34,7 +34,7 @@ public class HomeFragment extends Fragment {
     private ProgressBar mProgressBar;
     private TextView mTextCity;
     private String mUserLocation;
-    private HomeBooksAdapter mBookAdapter;
+    private BooksAdapter mBookAdapter;
     private RecyclerView mRecyclerView;
     private List<Book> mBooks = new ArrayList<>();
 
@@ -65,7 +65,7 @@ public class HomeFragment extends Fragment {
         // Set up the recycler view
         mRecyclerView = rootView.findViewById(R.id.tv_home_books_recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),2));
-        mBookAdapter = new HomeBooksAdapter(null);
+        mBookAdapter = new BooksAdapter(null, "SET_HOME_ADAPTER");
         mRecyclerView.setAdapter(mBookAdapter);
         // End set up the recycler view
 

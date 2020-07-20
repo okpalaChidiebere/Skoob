@@ -11,6 +11,7 @@ import androidx.viewpager.widget.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.android.skoob.R;
 import com.google.android.material.tabs.TabLayout;
@@ -26,6 +27,8 @@ public class AccountFragment extends Fragment {
     View myFragment;
     TabLayout tabLayout;
     ViewPager viewPager;
+    String userName;
+    TextView textUsername;
 
     public AccountFragment() {
         // Required empty public constructor
@@ -47,6 +50,11 @@ public class AccountFragment extends Fragment {
 
         // Find the tab layout that shows the tabs
         tabLayout = (TabLayout) myFragment.findViewById(R.id.news_tabLayout);
+
+        MainActivity activity = (MainActivity) getActivity();
+        userName = activity.getUserName();
+        textUsername = myFragment.findViewById(R.id.tv_account_username);
+        textUsername.setText(userName);
 
 
         return myFragment;

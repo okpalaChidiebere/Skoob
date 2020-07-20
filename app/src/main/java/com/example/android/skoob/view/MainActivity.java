@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
     BottomNavigationView bottomNavigationView;
     Fragment selectedFragment, fragmentToLoad;
     MenuItem temp_menuItem;
-    private String cityName, mUserEmail;
+    private String cityName, mUserEmail, mUsername;
     private List<Book> mBooks = new ArrayList<>();
 
     // Firebase instance variables
@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
 
         cityName = "";
         mUserEmail = "";
+        mUsername = "";
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -255,6 +256,7 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
                 temp_menuItem.setChecked(true);
                 FirebaseUser user = mFirebaseAuth.getCurrentUser();
                 mUserEmail = user.getEmail();
+                mUsername = user.getDisplayName();
 
                 Toast.makeText(this, "You're now signed in. Welcome to SKOOB.", Toast.LENGTH_SHORT).show();
 
@@ -305,6 +307,7 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
                 if (user != null) {
                     //user is signed in. Here we know the user had sign in once and never signed out of our app
                     mUserEmail = user.getEmail();
+                    mUsername = user.getDisplayName();
                     temp_menuItem.setChecked(true);
                     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.main_frame,fragmentToLoad);
@@ -340,6 +343,7 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
                 mFirebaseAuth.removeAuthStateListener(mAuthStateListener); //remove the FireBase login screen
             }
             mUserEmail = "";
+            mUsername = "";
 
             //Update the setting s fragment UI
             SettingsFragment settingsFragment = new SettingsFragment();
@@ -357,6 +361,10 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
 
     public String getUserEmail(){
         return mUserEmail;
+    }
+
+    public String getUserName(){
+        return mUsername;
     }
 
     public void AddListenersForFirebase(){
