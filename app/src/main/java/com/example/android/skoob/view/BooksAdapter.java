@@ -1,6 +1,7 @@
 package com.example.android.skoob.view;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,11 @@ import com.bumptech.glide.Glide;
 import com.example.android.skoob.R;
 import com.example.android.skoob.model.Book;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +29,12 @@ public class BooksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private final int ACCOUNT_FRAGMENT_ADAPTER = 2;
     private static final String SET_HOME_ADAPTER = "SET_HOME_ADAPTER";
     private static final String SET_ACCOUNT_ADAPTER = "SET_ACCOUNT_ADAPTER";
+
+    private static final int SECOND_MILLIS = 1000;
+    private static final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
+    private static final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
+    private static final int DAY_MILLIS = 24 * HOUR_MILLIS;
+
     private String mAdapterToDisplay;
 
     public BooksAdapter(List<Book> books, String adapterToDisplay){
@@ -105,7 +116,9 @@ public class BooksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                         .load(mBooksOnSale.get(position).getPhotoUrl().get(0))
                         .into(viewHolder2.mAccountImageThumbnail);
                 viewHolder2.mAccountTextBookTitle.setText(mBooksOnSale.get(position).getBookName());
-                viewHolder2.mAccountTextBookPostDate.setText("1w");
+
+                String convertTime = covertTimeToText(mBooksOnSale.get(position).getBookPostedTime());
+                viewHolder2.mAccountTextBookPostDate.setText(convertTime);
                 viewHolder2.mAccountTextBookPrice.setText("$" + mBooksOnSale.get(position).getPrice());
                 viewHolder2.mAccountTextBookCity.setText(mBooksOnSale.get(position).getPlace());
                 break;
@@ -144,6 +157,59 @@ public class BooksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
             notifyItemRangeRemoved(0, size);
         }
+    }
+
+    private String covertTimeToText(String dataDate) {
+
+        String convTime = null;
+
+        //String prefix = "";
+        //String suffix = "Ago";
+
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+            Date pasTime = dateFormat.parse(dataDate);
+            Date nowTime = new Date();
+
+            long dateDiff = Math.abs(nowTime.getTime() - pasTime.getTime());
+
+            /*int second = (int) (dateDiff / 1000) % 60 ;
+            int minute = (int) ((dateDiff / (1000*60)) % 60);
+            int hour   = (int) ((dateDiff / (1000*60*60)) % 24);*/
+            int day = (int) (dateDiff / (1000*60*60*24));
+
+            if (day >= 7) {
+                if (day > 360) {
+                    return (day / 30) + "y";
+                } else if (day > 30) {
+                    return (day / 360) + "m";
+                } else {
+                    return (day / 7) + "w";
+                }
+            }
+
+            if (dateDiff < MINUTE_MILLIS) {
+                return "just now";
+            } else if (dateDiff < 2 * MINUTE_MILLIS) {
+                return "1m";
+            } else if (dateDiff < 50 * MINUTE_MILLIS) {
+                return dateDiff / MINUTE_MILLIS + "m";
+            } else if (dateDiff < 90 * MINUTE_MILLIS) {
+                return "1h";
+            } else if (dateDiff < 24 * HOUR_MILLIS) {
+                return dateDiff / HOUR_MILLIS + "h";
+            } else if (dateDiff < 48 * HOUR_MILLIS) {
+                return "1d";
+            } else {
+                return dateDiff / DAY_MILLIS + "d";
+            }
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            Log.e("ConvTimeE", e.getMessage());
+        }
+
+        return convTime;
     }
 
 }

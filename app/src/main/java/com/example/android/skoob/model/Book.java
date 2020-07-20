@@ -14,13 +14,15 @@ public class Book {
     private String emailOfSeller;
     private String placeAddress; //shown in the detail page
     private String place; //used to sort the books based on location by buyer
+    private String bookPostedTime;
 
     //Firebase requires your POJO have to have an empty constructor
     public Book(){
     }
 
     public Book(String bookName, int isbnNumber, int price, String department, String subject,
-                List<String> photoUrl, String emailOfSeller, String placeAddress, String place) {
+                List<String> photoUrl, String emailOfSeller, String placeAddress, String place,
+                String bookPostedTime) {
         this.bookName = bookName;
         this.isbnNumber = isbnNumber;
         this.price = price;
@@ -30,6 +32,7 @@ public class Book {
         this.emailOfSeller = emailOfSeller;
         this.placeAddress = placeAddress;
         this.place = place;
+        this.bookPostedTime = bookPostedTime;
     }
 
     public String getBookName() {
@@ -104,6 +107,14 @@ public class Book {
         this.place = place;
     }
 
+    public String getBookPostedTime() {
+        return bookPostedTime;
+    }
+
+    public void setBookPostedTime(String bookPostedTime) {
+        this.bookPostedTime = bookPostedTime;
+    }
+
     @Override
     public String toString() {
         return "{" +
@@ -116,6 +127,7 @@ public class Book {
                 ", emailOfSeller='" + emailOfSeller + '\'' +
                 ", placeAddress='" + placeAddress + '\'' +
                 ", place='" + place + '\'' +
+                ", bookPostedTime'" + bookPostedTime + '\'' +
                 '}';
     }
 }

@@ -48,8 +48,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -442,6 +444,11 @@ public class PostFragment extends Fragment implements
             tempPrice = Integer.parseInt(mTextInputPrice.getEditText().getText().toString().trim());
             tempIsbnNumber = Integer.parseInt(mTextInputIsbnNumber.getEditText().getText().toString().trim());
 
+            //get the current date of posting
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault());
+            String currentDateandTime = sdf.format(new Date());
+            //end getting date
+
             Book bookForSale = new Book(mTextInputBookName.getEditText().getText().toString().trim(),
                     tempIsbnNumber,
                     tempPrice,
@@ -450,7 +457,8 @@ public class PostFragment extends Fragment implements
                     mBookImageToUpload,
                     UserEmail,
                     mTextInputLocation.getEditText().getText().toString().trim(),
-                    mPlaceCity);
+                    mPlaceCity,
+                    currentDateandTime);
             //this triggers the childEventListener, so our screen will be update with new data from firebase console database
             mBooksForSaleDatabaseReference.push().setValue(bookForSale);
             Toast.makeText(getContext(), "Successfully posted!", Toast.LENGTH_LONG).show();
