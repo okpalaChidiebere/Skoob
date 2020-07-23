@@ -21,4 +21,19 @@
 
     <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
 
+    <string name="action_email">Email</string>
+    <string name="book_detail_name">Introduction to Computer</string>
+    <string name="book_detail_price">$</string>
+    <string name="book_detail_location">FUTO, Imo State Owerri West, 460114, Nigeria</string>
+    <string name="book_detail_department">Department: </string>
+    <string name="book_detail_subject">Subject: </string>
+    <string name="book_detail_isbn">ISBN: </string>
+    <string name="book_detail_time">Posted: </string>
+    <string name="book_detail_status">Book Status: For Sale by Owner</string>
+
+    <string name="action_share">Share</string>
+
+    <string name="skoob_email_subject">SKOOB: </string>
+    <string name="email_message">I just saw your book on SKOOB. Is it still for sale?</string>
+
 </resources>
