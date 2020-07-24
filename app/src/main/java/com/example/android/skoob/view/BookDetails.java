@@ -8,26 +8,35 @@ import androidx.viewpager.widget.ViewPager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
 import com.example.android.skoob.R;
+import com.example.android.skoob.model.Book;
 import com.example.android.skoob.utils.AdMobUtil;
 import com.example.android.skoob.utils.Constants;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class BookDetails extends AppCompatActivity {
 
+    private static final int SECOND_MILLIS = 1000;
+    private static final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
+    private static final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
+    private static final int DAY_MILLIS = 24 * HOUR_MILLIS;
+
     private TextView mImagePositionSelected;
 
-    private List<String> mImageUrls = new ArrayList<>();
+    private Book mBooks;
 
     private TextView mBookName, mLocation, mPrice, mDepartment, mSubject, mIsbn, mDate, mStatus;
 
@@ -51,17 +60,15 @@ public class BookDetails extends AppCompatActivity {
         mDate = findViewById(R.id.tv_detail_postedTime);
         mStatus = findViewById(R.id.tv_detail_bookStatus);
 
-        mImageUrls.add("https://cdn.pixabay.com/photo/2016/11/11/23/34/cat-1817970_960_720.jpg");
-        mImageUrls.add("https://cdn.pixabay.com/photo/2017/12/21/12/26/glowworm-3031704_960_720.jpg");
-        mImageUrls.add("https://cdn.pixabay.com/photo/2017/11/07/00/07/fantasy-2925250_960_720.jpg");
+        mBooks = (Book) getIntent().getSerializableExtra(Constants.EXTRA_BOOK_DETAILS);
 
         ViewPager viewPager = findViewById(R.id.tv_image_details_viewPager);
-        BookImageViewPagerAdapter adapter = new BookImageViewPagerAdapter(this, mImageUrls);
+        BookImageViewPagerAdapter adapter = new BookImageViewPagerAdapter(this, mBooks.getPhotoUrl());
         viewPager.setAdapter(adapter);
 
         mImagePositionSelected = findViewById(R.id.tv_image_ViewPage_position);
         if(adapter.getCount() > 0){
-            mImagePositionSelected.setText("1/"+mImageUrls.size());
+            mImagePositionSelected.setText("1/"+mBooks.getPhotoUrl().size());
         }
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -74,7 +81,7 @@ public class BookDetails extends AppCompatActivity {
             public void onPageSelected(int position) {
 
                 int temp_position = ++position; //due to position starts to count from 0, i had to increment by one before i displau
-                mImagePositionSelected.setText(temp_position+"/"+mImageUrls.size());
+                mImagePositionSelected.setText(temp_position+"/"+mBooks.getPhotoUrl().size());
             }
 
             @Override
@@ -83,13 +90,14 @@ public class BookDetails extends AppCompatActivity {
             }
         });
 
-        mBookName.setText(getString(R.string.book_detail_name));
-        mLocation.setText(getString(R.string.book_detail_location));
-        mPrice.setText(getString(R.string.book_detail_price));
-        mDepartment.setText(getString(R.string.book_detail_department));
-        mSubject.setText(getString(R.string.book_detail_subject));
-        mIsbn.setText(getString(R.string.book_detail_isbn));
-        mDate.setText(getString(R.string.book_detail_time));
+        mBookName.setText(mBooks.getBookName());
+        mLocation.setText(mBooks.getPlaceAddress());
+        mPrice.setText(getString(R.string.book_detail_price)+mBooks.getPrice());
+        mDepartment.setText(getString(R.string.book_detail_department)+mBooks.getDepartment());
+        mSubject.setText(getString(R.string.book_detail_subject)+mBooks.getSubject());
+        mIsbn.setText(getString(R.string.book_detail_isbn)+mBooks.getIsbnNumber());
+        String time = covertTimeToText(mBooks.getBookPostedTime());
+        mDate.setText(getString(R.string.book_detail_time)+time);
         mStatus.setText(getString(R.string.book_detail_status));
 
         //Banner AdMob set up
@@ -102,7 +110,7 @@ public class BookDetails extends AppCompatActivity {
         mLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String map = "geo:0,0?q=" + getString(R.string.book_detail_location); // only map app should handle this
+                String map = "geo:0,0?q=" + mBooks.getPlaceAddress(); // only map app should handle this
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(map));
                 startActivity(intent);
             }
@@ -114,10 +122,12 @@ public class BookDetails extends AppCompatActivity {
             public void onClick(View view) {
 
                 Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse("mailto:okpalacollins4@gmail.com")); // only email apps should handle this
+                intent.setData(Uri.parse("mailto:"+mBooks.getEmailOfSeller()+
+                        "?subject="+getString(R.string.skoob_email_subject)+ mBooks.getBookName()+
+                        "&body=" +getString(R.string.email_message))); // only email apps should handle this
                 intent.putExtra(Intent.EXTRA_SUBJECT,
-                        getString(R.string.skoob_email_subject)+ getString(R.string.book_detail_name));
-                intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.email_message));
+                        getString(R.string.skoob_email_subject)+ mBooks.getBookName());
+                //intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.email_message));
 
                 if (intent.resolveActivity(getPackageManager()) != null) {
                     startActivity(intent);
@@ -138,9 +148,56 @@ public class BookDetails extends AppCompatActivity {
     private Intent createShareForecastIntent() {
         Intent shareIntent = ShareCompat.IntentBuilder.from(this)
                 .setType("text/plain")
-                .setText(mBookName.getText() + Constants.SKOOB_SHARE_HASHTAG)
+                .setText(mBooks.getBookName() + Constants.SKOOB_SHARE_HASHTAG)
                 .getIntent();
         return shareIntent;
     }
 
+    private String covertTimeToText(String dataDate) {
+
+        String convTime = null;
+        String suffix = "Ago";
+
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+            Date pasTime = dateFormat.parse(dataDate);
+            Date nowTime = new Date();
+
+            long dateDiff = Math.abs(nowTime.getTime() - pasTime.getTime());
+
+            int day = (int) (dateDiff / (1000*60*60*24));
+
+            if (day >= 7) {
+                if (day > 360) {
+                    return (day / 30) + " Years " + suffix;
+                } else if (day > 30) {
+                    return (day / 360) + " Months " + suffix;
+                } else {
+                    return (day / 7) + " Week " + suffix;
+                }
+            }
+
+            if (dateDiff < MINUTE_MILLIS) {
+                return "just now";
+            } else if (dateDiff < 2 * MINUTE_MILLIS) {
+                return "a minute ago";
+            } else if (dateDiff < 50 * MINUTE_MILLIS) {
+                return dateDiff / MINUTE_MILLIS + " minutes ago";
+            } else if (dateDiff < 90 * MINUTE_MILLIS) {
+                return "an hour ago";
+            } else if (dateDiff < 24 * HOUR_MILLIS) {
+                return dateDiff / HOUR_MILLIS + " hours ago";
+            } else if (dateDiff < 48 * HOUR_MILLIS) {
+                return "yesterday";
+            } else {
+                return dateDiff / DAY_MILLIS + " days ago";
+            }
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            Log.e("ConvTimeE", e.getMessage());
+        }
+
+        return convTime;
+    }
 }

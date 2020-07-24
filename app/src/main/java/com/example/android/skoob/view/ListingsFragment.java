@@ -1,5 +1,6 @@
 package com.example.android.skoob.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.ProgressBar;
 
 import com.example.android.skoob.R;
 import com.example.android.skoob.model.Book;
+import com.example.android.skoob.utils.Constants;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -22,7 +24,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ListingsFragment extends Fragment {
+public class ListingsFragment extends Fragment implements BooksAdapter.BooksAdapterOnClickHandler{
 
     private List<Book> mBooks = new ArrayList<>();
     private BooksAdapter mBookAdapter;
@@ -47,7 +49,7 @@ public class ListingsFragment extends Fragment {
         // Set up the recycler view
         mRecyclerView = rootView.findViewById(R.id.tv_recyclerview_userListings);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mBookAdapter = new BooksAdapter(null, "SET_ACCOUNT_ADAPTER");
+        mBookAdapter = new BooksAdapter(null, "SET_ACCOUNT_ADAPTER", this);
         mRecyclerView.setAdapter(mBookAdapter);
         // End set up the recycler view
 
@@ -79,5 +81,12 @@ public class ListingsFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onClick(Book book) {
+        final Intent intent = new Intent(getContext(), BookDetails.class);
+        intent.putExtra(Constants.EXTRA_BOOK_DETAILS, book);
+        startActivity(intent);
     }
 }

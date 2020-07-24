@@ -26,17 +26,17 @@
             android:value="ca-app-pub-3940256099942544~3347511713" />
 
         <activity android:name=".view.MainActivity">
-
-        </activity>
-        <activity android:name=".view.BookDetails"
-            android:launchMode="singleTop"
-            android:parentActivityName=".view.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".view.BookDetails"
+            android:launchMode="singleTop"
+            android:parentActivityName=".view.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+
         </activity>
 
         <!-- Include the AdActivity configChanges and theme. -->

@@ -37,12 +37,19 @@ public class BooksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     private String mAdapterToDisplay;
 
-    public BooksAdapter(List<Book> books, String adapterToDisplay){
-        this.mBooksOnSale = books;
-        this.mAdapterToDisplay = adapterToDisplay;
+    private final BooksAdapterOnClickHandler mClickHandler;
+
+    public interface BooksAdapterOnClickHandler {
+        void onClick(Book book);
     }
 
-    class HomeBooksAdapterViewHolder extends RecyclerView.ViewHolder{
+    public BooksAdapter(List<Book> books, String adapterToDisplay, BooksAdapterOnClickHandler clickHandler){
+        this.mBooksOnSale = books;
+        this.mAdapterToDisplay = adapterToDisplay;
+        this.mClickHandler = clickHandler;
+    }
+
+    class HomeBooksAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView mImageThumbnail;
         TextView mTextBookTitle, mTextBookPrice;
 
@@ -52,10 +59,19 @@ public class BooksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             mImageThumbnail = view.findViewById(R.id.tv_book_thumbnail);
             mTextBookTitle = view.findViewById(R.id.tv_bookName);
             mTextBookPrice = view.findViewById(R.id.tv_bookPrice);
+
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            Book book = mBooksOnSale.get(adapterPosition);
+            mClickHandler.onClick(book);
         }
     }
 
-    class AccountBooksAdapterViewHolder extends RecyclerView.ViewHolder{
+    class AccountBooksAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView mAccountImageThumbnail;
         TextView mAccountTextBookTitle, mAccountTextBookPrice, mAccountTextBookPostDate, mAccountTextBookCity;
 
@@ -67,6 +83,15 @@ public class BooksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             mAccountTextBookPostDate = view.findViewById(R.id.date);
             mAccountTextBookPrice = view.findViewById(R.id.tv_price);
             mAccountTextBookCity = view.findViewById(R.id.location);
+
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            Book book = mBooksOnSale.get(adapterPosition);
+            mClickHandler.onClick(book);
         }
     }
 

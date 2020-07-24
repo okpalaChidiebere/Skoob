@@ -1,6 +1,7 @@
 package com.example.android.skoob.view;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -15,9 +16,11 @@ import android.widget.TextView;
 
 import com.example.android.skoob.R;
 import com.example.android.skoob.model.Book;
+import com.example.android.skoob.utils.Constants;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,7 +32,7 @@ import java.util.List;
  * Use the {@link HomeFragment#getInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements BooksAdapter.BooksAdapterOnClickHandler{
 
     private ProgressBar mProgressBar;
     private TextView mTextCity;
@@ -65,7 +68,7 @@ public class HomeFragment extends Fragment {
         // Set up the recycler view
         mRecyclerView = rootView.findViewById(R.id.tv_home_books_recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),2));
-        mBookAdapter = new BooksAdapter(null, "SET_HOME_ADAPTER");
+        mBookAdapter = new BooksAdapter(null, "SET_HOME_ADAPTER", this);
         mRecyclerView.setAdapter(mBookAdapter);
         // End set up the recycler view
 
@@ -110,5 +113,12 @@ public class HomeFragment extends Fragment {
             }
         });
         return books;
+    }
+
+    @Override
+    public void onClick(Book book) {
+        final Intent intent = new Intent(getContext(), BookDetails.class);
+        intent.putExtra(Constants.EXTRA_BOOK_DETAILS, book);
+        startActivity(intent);
     }
 }
