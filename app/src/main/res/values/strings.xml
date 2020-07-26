@@ -32,6 +32,8 @@
     <string name="book_detail_status">Book Status: For Sale by Owner</string>
 
     <string name="action_share">Share</string>
+    <string name="action_favourite">Favourite</string>
+    <string name="action_delete">Delete</string>
 
     <string name="skoob_email_subject">SKOOB: </string>
     <string name="email_message">I just saw your book on SKOOB. Is it still for sale?</string>

@@ -117,8 +117,11 @@ public class HomeFragment extends Fragment implements BooksAdapter.BooksAdapterO
 
     @Override
     public void onClick(Book book) {
+        MainActivity activity = (MainActivity) getActivity();
+        String userEmail = activity.getUserEmail();
         final Intent intent = new Intent(getContext(), BookDetails.class);
         intent.putExtra(Constants.EXTRA_BOOK_DETAILS, book);
+        intent.putExtra(Constants.EXTRA_USER_LOGIN_EMAIL, userEmail);
         startActivity(intent);
     }
 }
