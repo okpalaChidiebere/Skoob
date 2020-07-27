@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.example.android.skoob.R;
 import com.example.android.skoob.model.Book;
+import com.example.android.skoob.utils.AES;
 import com.example.android.skoob.utils.AdMobUtil;
 import com.example.android.skoob.utils.Constants;
 import com.google.android.gms.ads.AdRequest;
@@ -300,8 +301,10 @@ public class BookDetails extends AppCompatActivity {
     }
 
     private void setBookDetailsData(){
+        String decryptedLocation = AES.decrypt(mBooks.getPlaceAddress(), Constants.SECRET_AES_KEY);
+
         mBookName.setText(mBooks.getBookName());
-        mLocation.setText(mBooks.getPlaceAddress());
+        mLocation.setText(decryptedLocation);
         mPrice.setText(getString(R.string.book_detail_price)+mBooks.getPrice());
         mDepartment.setText(getString(R.string.book_detail_department)+mBooks.getDepartment());
         mSubject.setText(getString(R.string.book_detail_subject)+mBooks.getSubject());

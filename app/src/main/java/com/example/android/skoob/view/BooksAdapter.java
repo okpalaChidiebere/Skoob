@@ -11,6 +11,8 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.android.skoob.R;
 import com.example.android.skoob.model.Book;
+import com.example.android.skoob.utils.AES;
+import com.example.android.skoob.utils.Constants;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -145,7 +147,8 @@ public class BooksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 String convertTime = covertTimeToText(mBooksOnSale.get(position).getBookPostedTime());
                 viewHolder2.mAccountTextBookPostDate.setText(convertTime);
                 viewHolder2.mAccountTextBookPrice.setText("$" + mBooksOnSale.get(position).getPrice());
-                viewHolder2.mAccountTextBookCity.setText(mBooksOnSale.get(position).getPlace());
+                String decryptedPlaceCity = AES.decrypt(mBooksOnSale.get(position).getPlace(), Constants.SECRET_AES_KEY);
+                viewHolder2.mAccountTextBookCity.setText(decryptedPlaceCity);
                 break;
         }
     }

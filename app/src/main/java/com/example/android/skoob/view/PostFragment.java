@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.example.android.skoob.R;
 import com.example.android.skoob.model.Book;
+import com.example.android.skoob.utils.AES;
 import com.example.android.skoob.utils.Constants;
 import com.google.android.gms.common.api.Status;
 
@@ -449,6 +450,10 @@ public class PostFragment extends Fragment implements
             String currentDateandTime = sdf.format(new Date());
             //end getting date
 
+            String encryptedLocation = AES.encrypt(mTextInputLocation.getEditText().getText().toString().trim(),
+                    Constants.SECRET_AES_KEY);
+            String encryptedPlaceCity = AES.encrypt(mPlaceCity, Constants.SECRET_AES_KEY) ;
+
             Book bookForSale = new Book(mTextInputBookName.getEditText().getText().toString().trim(),
                     tempIsbnNumber,
                     tempPrice,
@@ -456,8 +461,8 @@ public class PostFragment extends Fragment implements
                     mTextInputSubject.getEditText().getText().toString().trim(),
                     mBookImageToUpload,
                     UserEmail,
-                    mTextInputLocation.getEditText().getText().toString().trim(),
-                    mPlaceCity,
+                    encryptedLocation,
+                    encryptedPlaceCity,
                     currentDateandTime);
             //this triggers the childEventListener, so our screen will be update with new data from firebase console database
             mBooksForSaleDatabaseReference.push().setValue(bookForSale);

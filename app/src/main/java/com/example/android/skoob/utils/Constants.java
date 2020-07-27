@@ -6,4 +6,5 @@ public class Constants {
     public static final String SKOOB_SHARE_HASHTAG = " #SKOOB";
     public static final String EXTRA_BOOK_DETAILS = "EXTRA_BOOK_DETAILS";
     public static final String EXTRA_USER_LOGIN_EMAIL = "EXTRA_USER_LOGIN_EMAIL";
+    public static final String SECRET_AES_KEY = "ssshhhhhhhhhhh!!!!";
 }
