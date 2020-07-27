@@ -4,6 +4,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ShareCompat;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
 import android.content.DialogInterface;
@@ -17,7 +19,10 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.android.skoob.R;
+import com.example.android.skoob.database.FavouritesViewModel;
+import com.example.android.skoob.database.FavouritesViewModelFactory;
 import com.example.android.skoob.model.Book;
+import com.example.android.skoob.model.Favourites;
 import com.example.android.skoob.utils.AES;
 import com.example.android.skoob.utils.AdMobUtil;
 import com.example.android.skoob.utils.Constants;
@@ -44,6 +49,8 @@ public class BookDetails extends AppCompatActivity {
     private static final int DAY_MILLIS = 24 * HOUR_MILLIS;
 
     private TextView mImagePositionSelected;
+    private FavouritesViewModel mFavouritesViewModel;
+    private FavouritesViewModelFactory mModelFactory;
 
     private Book mBooks;
     private int drawableResourceId;
@@ -240,10 +247,14 @@ public class BookDetails extends AppCompatActivity {
     private void setIconState(){
         if(drawableResourceId == R.drawable.heart_fill){
             drawableResourceId = R.drawable.heart_empty;
-            System.out.println("bookPushID empty: "+mPushID);
+            //System.out.println("bookPushID empty: "+mPushID);
+            mFavouritesViewModel.deleteFavourite(mPushID);
+
         }else{
             drawableResourceId = R.drawable.heart_fill;
-            System.out.println("bookPushID fill: "+mPushID);
+            //System.out.println("bookPushID fill: "+mPushID);
+            Favourites favourites = new Favourites(mPushID);
+            mFavouritesViewModel.insertFavourite(favourites);
         }
     }
 
@@ -312,5 +323,22 @@ public class BookDetails extends AppCompatActivity {
         String time = covertTimeToText(mBooks.getBookPostedTime());
         mDate.setText(getString(R.string.book_detail_time)+time);
         mStatus.setText(getString(R.string.book_detail_status));
+        initializeFavouriteIcon();
+    }
+
+    public void initializeFavouriteIcon(){
+        mModelFactory = new FavouritesViewModelFactory(this, mPushID);
+        mFavouritesViewModel = new ViewModelProvider(this, mModelFactory).get(FavouritesViewModel.class);
+        mFavouritesViewModel.getCheckFavouriteReturnRow().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                if(Integer.valueOf(integer) != 0) {
+                    drawableResourceId = R.drawable.heart_fill;
+                }else{
+                    drawableResourceId = R.drawable.heart_empty;
+                }
+                invalidateOptionsMenu(); //force a refresh of the menu with updated drawable icon
+            }
+        });
     }
 }
