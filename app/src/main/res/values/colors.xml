@@ -8,4 +8,5 @@
     <color name="colorPrimaryText">#212121</color>
     <color name="colorSecondaryText">#757575</color>
     <color name="colorDivider">#BDBDBD</color>
+    <color name="colorPageDivider">#e6e6e6</color>
 </resources>

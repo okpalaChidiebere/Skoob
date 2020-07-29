@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceFragmentCompat;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -88,4 +89,22 @@ public class SettingsFragment extends Fragment {
         return rootView;
     }
 
+
+    public static class GeneralPreferenceFragment extends PreferenceFragmentCompat{
+
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            // Load the preferences from an XML resource in res->xml->pref_general
+            setPreferencesFromResource(R.xml.pref_general, rootKey);
+        }
+    }
+
+    public static class NotificationsPreferenceFragment extends PreferenceFragmentCompat{
+
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            // Load the preferences from an XML resource in res->xml->pref_notifications
+            setPreferencesFromResource(R.xml.pref_notifications, rootKey);
+        }
+    }
 }

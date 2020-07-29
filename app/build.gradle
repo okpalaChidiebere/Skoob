@@ -62,4 +62,7 @@ dependencies {
     def lifecycle_version = "2.2.0"
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
+    //preference for androidx
+    def preference_version = "1.1.1"
+    implementation "androidx.preference:preference:$preference_version"
 }

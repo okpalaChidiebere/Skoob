@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:defaultValue="@bool/pref_bump_alert_default"
+        android:key="@string/pref_skoob_bump_up_alert_key"
+        android:summaryOff="@string/pref_skoob_false"
+        android:summaryOn="@string/pref_skoob_true"
+        android:title="@string/pref_skoob_bump_up_alert_label" />
+
+</PreferenceScreen>

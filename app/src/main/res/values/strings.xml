@@ -40,4 +40,22 @@
 
     <string name="no_favorite_added">PLEASE ADD BOOKS TO THIS LIST</string>
 
+    <string name="settings_general">General</string>
+    <string name="setting_notifications">Push Notifications</string>
+
+    <!-- - - - - - - - - - - - - - - -
+          - Used by Preferences  -
+          - - - - - - - - - - - - - - - -->
+    <!-- Label for the warn before exit checkbox preference -->
+    <string name="pref_skoob_warn_before_exit_label">Warn me before exiting</string>
+    <!-- Key name for storing warn before exit in SharedPreferences -->
+    <string name="pref_skoob_warn_before_exit_key" translatable="false">warn_before_exit</string>
+    <!-- Label for the bump up alert checkbox preference -->
+    <string name="pref_skoob_bump_up_alert_label">Bump up alerts</string>
+    <!-- Key name for storing warn before exit in SharedPreferences -->
+    <string name="pref_skoob_bump_up_alert_key" translatable="false">bump_alert</string>
+
+    <!-- Summary for Checkboxes -->
+    <string name="pref_skoob_true">Yes</string>
+    <string name="pref_skoob_false">No</string>
 </resources>
