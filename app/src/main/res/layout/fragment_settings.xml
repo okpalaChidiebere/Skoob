@@ -40,7 +40,7 @@
             android:background="@color/colorDivider" />
     </LinearLayout>
 
-    <androidx.fragment.app.FragmentContainerView
+    <fragment
         android:id="@+id/tv_pref_general_settings"
         android:name="com.example.android.skoob.view.SettingsFragment$GeneralPreferenceFragment"
         android:layout_width="match_parent"
@@ -85,7 +85,7 @@
             android:background="@color/colorDivider" />
     </LinearLayout>
 
-    <androidx.fragment.app.FragmentContainerView
+    <fragment
         android:id="@+id/tv_pref_notifications_settings"
         android:name="com.example.android.skoob.view.SettingsFragment$NotificationsPreferenceFragment"
         android:layout_width="match_parent"

@@ -53,7 +53,7 @@
     <!-- Label for the bump up alert checkbox preference -->
     <string name="pref_skoob_bump_up_alert_label">Bump up alerts</string>
     <!-- Key name for storing warn before exit in SharedPreferences -->
-    <string name="pref_skoob_bump_up_alert_key" translatable="false">bump_alert</string>
+    <string name="pref_skoob_bump_up_alert_key" translatable="false">key_bump_alert</string>
 
     <!-- Summary for Checkboxes -->
     <string name="pref_skoob_true">Yes</string>

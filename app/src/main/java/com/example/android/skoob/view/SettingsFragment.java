@@ -2,17 +2,22 @@ package com.example.android.skoob.view;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.preference.CheckBoxPreference;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.skoob.R;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 
 /**
@@ -22,6 +27,7 @@ import com.example.android.skoob.R;
  */
 public class SettingsFragment extends Fragment {
 
+    private static String LOG_TAG = SettingsFragment.class.getSimpleName();
     private TextView mTextEmail, mSignOutText, mAuthMessage;
     private String mUserEmail;
 
@@ -86,6 +92,14 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        //MainActivity activity = (MainActivity) getActivity();
+        Bundle extras = getActivity().getIntent().getExtras();
+        // Checks if the extras exist and if the key "test" from our FCM message is in the intent
+        if (extras != null && extras.containsKey("test")) {
+            // If the key is there, print out the value of "test"
+            Log.d(LOG_TAG, "Contains: " + extras.getString("test"));
+        }
+
         return rootView;
     }
 
@@ -99,12 +113,53 @@ public class SettingsFragment extends Fragment {
         }
     }
 
-    public static class NotificationsPreferenceFragment extends PreferenceFragmentCompat{
+    public static class NotificationsPreferenceFragment extends PreferenceFragmentCompat implements
+            SharedPreferences.OnSharedPreferenceChangeListener{
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             // Load the preferences from an XML resource in res->xml->pref_notifications
             setPreferencesFromResource(R.xml.pref_notifications, rootKey);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+            Preference preference = findPreference(key);
+            if (null != preference) {
+                if ((preference instanceof CheckBoxPreference)) {
+                    // Get the current state of the CheckBox preference
+                    boolean isChecked = sharedPreferences.getBoolean(key, false);
+                    if (isChecked) {
+                        /*The preference key matches the following key for the associated instructor in
+                        FCM. For example, the key for Bump alert is key_bump_alert (as seen in
+                        pref_notifications.xml). The topic for Bump alert's messages is /topics/key_bump_alert
+                        So when u send a notificatoin through the console put the topic 'key_bump_alert' to send
+                        messages to all subscribers of this topic*/
+                        // Subscribe
+                        FirebaseMessaging.getInstance().subscribeToTopic(key);
+                        Log.d(LOG_TAG, "Subscribing to " + key);
+                    }else{
+                        // Un-subscribe
+                        FirebaseMessaging.getInstance().unsubscribeFromTopic(key);
+                        Log.d(LOG_TAG, "Un-subscribing to " + key);
+                    }
+                }
+            }
+
+        }
+            @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            getPreferenceScreen().getSharedPreferences()
+                    .registerOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            getPreferenceScreen().getSharedPreferences()
+                    .unregisterOnSharedPreferenceChangeListener(this);
         }
     }
 }
