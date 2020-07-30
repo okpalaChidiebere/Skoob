@@ -6,13 +6,16 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.PreferenceManager;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -39,7 +42,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements SettingsFragment.settingsAuthButtonOnClickListener{
+public class MainActivity extends AppCompatActivity implements SettingsFragment.settingsAuthButtonOnClickListener, SettingsFragment.setBoolPrefBackButton{
 
     public static final int RC_SIGN_IN = 1; //it is a flag for when we come back to starting the activity for result
     private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 111;
@@ -64,6 +67,11 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
     private DatabaseReference mBooksForSaleDatabaseReference; //represent s a specific part of the Firebase database
     private ChildEventListener mChildEventListener;
     private ValueEventListener mValueEventListener;
+
+    private boolean prefBackButtonToExit;
+    private boolean backPressedOnce = false;
+    private Handler statusUpdateHandler = new Handler();
+    private Runnable statusUpdateRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
             public void onCancelled(DatabaseError databaseError) {}
         };
 
+        setupSharedPreferences();
     }
 
     private void setDefaultFragment(){
@@ -370,5 +379,50 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
     public void AddListenersForFirebase(){
         mBooksForSaleDatabaseReference.addChildEventListener(mChildEventListener);
         mBooksForSaleDatabaseReference.addListenerForSingleValueEvent(mValueEventListener);
+    }
+
+    private void setupSharedPreferences() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        prefBackButtonToExit = sharedPreferences.getBoolean(getString(R.string.pref_skoob_warn_before_exit_key),
+                getResources().getBoolean(R.bool.pref_warn_exit_default));
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if(prefBackButtonToExit){
+            if (backPressedOnce) {
+                finish();
+            }
+
+            backPressedOnce = true;
+            final Toast toast = Toast.makeText(this, "Press again to exit", Toast.LENGTH_SHORT);
+            toast.show();
+
+            statusUpdateRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    backPressedOnce = false;
+                    toast.cancel();  //Removes the toast after the exit.
+                }
+            };
+
+            statusUpdateHandler.postDelayed(statusUpdateRunnable, 2000);
+        }else{
+            finish();
+        }
+    }
+
+    @Override
+    public void onSetBoolPrefBackButton(boolean val) {
+        prefBackButtonToExit = val;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (statusUpdateHandler != null) {
+            statusUpdateHandler.removeCallbacks(statusUpdateRunnable);
+        }
     }
 }

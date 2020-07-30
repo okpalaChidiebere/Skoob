@@ -31,11 +31,15 @@ public class SettingsFragment extends Fragment {
     private TextView mTextEmail, mSignOutText, mAuthMessage;
     private String mUserEmail;
 
-
+    static setBoolPrefBackButton mSetBoolPrefBackButtonCallBack;
     settingsAuthButtonOnClickListener mCallback; //This will be overiden in the MainActivity to know when the sign in or out textView is clicked
 
     public interface settingsAuthButtonOnClickListener {
         void onSettingsAuthButtonSelected();
+    }
+
+    public interface setBoolPrefBackButton{
+        void onSetBoolPrefBackButton(boolean val);
     }
 
     public SettingsFragment() {
@@ -60,6 +64,7 @@ public class SettingsFragment extends Fragment {
         // If not, it throws an exception
         try {
             mCallback = (settingsAuthButtonOnClickListener) context;
+            mSetBoolPrefBackButtonCallBack = (setBoolPrefBackButton) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " must implement settingsAuthButtonOnClickListener");
@@ -124,6 +129,13 @@ public class SettingsFragment extends Fragment {
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+            if (key.equals(getString(R.string.pref_skoob_warn_before_exit_key))) {
+                boolean tempValue = sharedPreferences.getBoolean(getString(R.string.pref_skoob_warn_before_exit_key),
+                        getResources().getBoolean(R.bool.pref_warn_exit_default));
+
+                mSetBoolPrefBackButtonCallBack.onSetBoolPrefBackButton(tempValue);
+            }
 
             Preference preference = findPreference(key);
             if (null != preference) {
