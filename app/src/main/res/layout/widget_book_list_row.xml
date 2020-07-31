@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:id="@+id/tv_widget_list_row_cover">
+
+    <ImageView
+        android:id="@+id/tv_widget_bookImage"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_weight="1"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop" />
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/tv_widget_bookName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/colorSecondaryText"
+            tools:text="Ingredients" />
+
+        <TextView
+            android:id="@+id/tv_widget_price"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryText"
+            android:textSize="@dimen/detail_title_text_size"
+            tools:text="testPrice"
+            android:layout_above="@+id/tv_widget_place"/>
+
+        <TextView
+            android:id="@+id/tv_widget_place"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorSecondaryText"
+            tools:text="saskatoon"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tv_widget_news_posted_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="end"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
+        android:textColor="@color/colorSecondaryText"
+        tools:text="55w" />
+</LinearLayout>

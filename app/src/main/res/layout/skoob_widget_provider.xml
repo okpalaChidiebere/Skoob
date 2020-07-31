@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFF"
+    android:orientation="vertical"
+    android:padding="@dimen/widget_margin">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:paddingLeft="10dp"
+        android:paddingTop="2dp">
+
+        <TextView
+            android:id="@+id/widget_ingredient_list_title"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:contentDescription="@string/appwidget_title_text"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="left"
+            android:text="@string/appwidget_title_text"
+            android:textAllCaps="true"
+            android:textColor="#ffffff"
+            android:textSize="17sp" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/widget_skoob_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="3dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginTop="3dp" />
+</LinearLayout>

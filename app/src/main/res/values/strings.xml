@@ -58,4 +58,6 @@
     <!-- Summary for Checkboxes -->
     <string name="pref_skoob_true">Yes</string>
     <string name="pref_skoob_false">No</string>
+    <string name="appwidget_title_text">SKOOB</string>
+    <string name="add_widget">Add widget</string>
 </resources>

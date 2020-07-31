@@ -13,12 +13,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <receiver android:name=".utils.SkoobWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/skoob_widget_provider_info" />
+        </receiver>
+        <!--This is required for immediate update of widget on app download-->
+        <service android:name=".utils.WidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCir2Pcz-LENT64X0NwORNJ7R1gaX2QhOg" />
-
-        <!--This is sample AdMob ID. For more info check this link
+        <!--
+This is sample AdMob ID. For more info check this link
          https://firebase.google.com/docs/admob/android/quick-start
         -->
         <meta-data
@@ -32,14 +44,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.BookDetails"
+        <activity
+            android:name=".view.BookDetails"
             android:launchMode="singleTop"
             android:parentActivityName=".view.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-
-        </activity>
-
-        <!-- Include the AdActivity configChanges and theme. -->
+            android:theme="@style/AppTheme.NoActionBar"></activity> <!-- Include the AdActivity configChanges and theme. -->
         <activity
             android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
