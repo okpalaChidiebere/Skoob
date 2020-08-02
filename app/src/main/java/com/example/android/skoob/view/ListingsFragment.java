@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.android.skoob.R;
 import com.example.android.skoob.model.Book;
@@ -30,6 +31,7 @@ public class ListingsFragment extends Fragment implements BooksAdapter.BooksAdap
     private BooksAdapter mBookAdapter;
     private RecyclerView mRecyclerView;
     private ProgressBar mProgressBar;
+    private TextView mDefaultMessage;
 
     // Firebase instance variables
     private DatabaseReference mBooksForSaleDatabaseReference; //represent s a specific part of the Firebase database
@@ -42,6 +44,7 @@ public class ListingsFragment extends Fragment implements BooksAdapter.BooksAdap
 
         mProgressBar = rootView.findViewById(R.id.tv_listing_progressBar);
         mProgressBar.setVisibility(View.VISIBLE);
+        mDefaultMessage = rootView.findViewById(R.id.tv_default_listings_message);
 
         MainActivity activity = (MainActivity) getActivity();
         final String userEmail = activity.getUserEmail();
@@ -70,7 +73,10 @@ public class ListingsFragment extends Fragment implements BooksAdapter.BooksAdap
                     }
                     if(dataSnapshot.getChildrenCount() == mBooks.size()){
                         mProgressBar.setVisibility(View.GONE);
+                        listingsBookListExists();
                     }
+                }else{
+                    noBookListingsList();
                 }
 
             }
@@ -91,5 +97,16 @@ public class ListingsFragment extends Fragment implements BooksAdapter.BooksAdap
         intent.putExtra(Constants.EXTRA_BOOK_DETAILS, book);
         intent.putExtra(Constants.EXTRA_USER_LOGIN_EMAIL, userEmail);
         startActivity(intent);
+    }
+
+    private void listingsBookListExists() {
+        mDefaultMessage.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    private void noBookListingsList(){
+        mDefaultMessage.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.GONE);
     }
 }

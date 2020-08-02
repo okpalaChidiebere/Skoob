@@ -3,6 +3,7 @@ package com.example.android.skoob.view;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NavUtils;
 import androidx.core.app.ShareCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -175,6 +176,12 @@ public class BookDetails extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
+        // When the home button is pressed, take the user back to the MainActivity
+        if (id == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+        }
+
         if (id == R.id.action_favourite) {
             setIconState();
             invalidateOptionsMenu(); //force a refresh of the menu with updated drawable icon
@@ -299,6 +306,8 @@ public class BookDetails extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         System.out.println("bookPushID empty: "+mPushID);
+                        deleteBookPostFromFirebase(mPushID); //onChildRemoved in MainActivity wil be triggered
+                        NavUtils.navigateUpFromSameTask(BookDetails.this);
                     }
                 });
         builder1.setNegativeButton(android.R.string.no, null);
@@ -340,5 +349,9 @@ public class BookDetails extends AppCompatActivity {
                 invalidateOptionsMenu(); //force a refresh of the menu with updated drawable icon
             }
         });
+    }
+
+    private void deleteBookPostFromFirebase(String pushId) {
+        mBooksForSaleDatabaseReference.child(pushId).removeValue();
     }
 }

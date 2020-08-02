@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.android.skoob.R;
 import com.example.android.skoob.model.Book;
+import com.example.android.skoob.repository.BookRepository;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -72,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
     private boolean backPressedOnce = false;
     private Handler statusUpdateHandler = new Handler();
     private Runnable statusUpdateRunnable;
+
+    //private FavouritesViewModel mFavouritesViewModel;
+    private BookRepository mBookRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,12 +162,19 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
             }
 
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                String key = dataSnapshot.getKey();
+                Book book = dataSnapshot.getValue(Book.class);
+                mBookRepository =  new BookRepository(MainActivity.this);
+                mBookRepository.deleteFavourite(key); //also delete from the user database if it exists
+                removeDeletedKey(book.getEmailOfSeller(), book.getBookName()); //remove the deleted book from he list
+            }
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
             public void onCancelled(DatabaseError databaseError) {}
         };
 
         setupSharedPreferences();
+        setDefaultFragment(); //this is going to load an empty home fragment making the progressbar visible
     }
 
     private void setDefaultFragment(){
@@ -423,6 +434,15 @@ public class MainActivity extends AppCompatActivity implements SettingsFragment.
         super.onDestroy();
         if (statusUpdateHandler != null) {
             statusUpdateHandler.removeCallbacks(statusUpdateRunnable);
+        }
+    }
+
+    private void removeDeletedKey(String email, String bookName){
+        for (int j = 0; j < mBooks.size(); j++) {
+            if(mBooks.get(j).getBookName().equals(bookName) && mBooks.get(j).getEmailOfSeller().equals(email)) {
+                mBooks.remove(j);
+                return;
+            }
         }
     }
 }

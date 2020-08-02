@@ -37,7 +37,9 @@ This is sample AdMob ID. For more info check this link
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713" />
 
-        <activity android:name=".view.MainActivity">
+        <activity android:name=".view.MainActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation = "portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,9 +48,13 @@ This is sample AdMob ID. For more info check this link
         </activity>
         <activity
             android:name=".view.BookDetails"
-            android:launchMode="singleTop"
             android:parentActivityName=".view.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity> <!-- Include the AdActivity configChanges and theme. -->
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation = "portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".view.MainActivity" />
+        </activity> <!-- Include the AdActivity configChanges and theme. -->
         <activity
             android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"

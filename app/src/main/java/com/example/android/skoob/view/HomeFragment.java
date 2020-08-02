@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 
 import com.example.android.skoob.R;
 import com.example.android.skoob.model.Book;
+import com.example.android.skoob.utils.AES;
+import com.example.android.skoob.utils.AdMobUtil;
 import com.example.android.skoob.utils.Constants;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -40,6 +43,8 @@ public class HomeFragment extends Fragment implements BooksAdapter.BooksAdapterO
     private BooksAdapter mBookAdapter;
     private RecyclerView mRecyclerView;
     private List<Book> mBooks = new ArrayList<>();
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private boolean mIsRefreshing = false;
 
 
     public HomeFragment() {
@@ -72,11 +77,13 @@ public class HomeFragment extends Fragment implements BooksAdapter.BooksAdapterO
         mRecyclerView.setAdapter(mBookAdapter);
         // End set up the recycler view
 
+        mSwipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_layout);
         mProgressBar = rootView.findViewById(R.id.progressBar);
         mTextCity = rootView.findViewById(R.id.tv_city);
 
         //Banner AdMob set up
         AdView mAdView = rootView.findViewById(R.id.adView);
+        mAdView.setMinimumHeight(AdMobUtil.getAdViewHeightInDP(getActivity()));
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
         //end banner ad set up
@@ -89,11 +96,22 @@ public class HomeFragment extends Fragment implements BooksAdapter.BooksAdapterO
             mProgressBar.setVisibility(View.GONE);
             List<Book> tempBooks = sortBooks(mBooks); //sort the list first
             mBookAdapter.setData(tempBooks); //load the adapter data with sorted list
+            //mIsRefreshing = true;
         }else{
            //No books found in database
             mBookAdapter.setData(null);
         }
 
+        mSwipeRefreshLayout.setRefreshing(mIsRefreshing);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mSwipeRefreshLayout.setRefreshing(mIsRefreshing);
+                //usually you will run a service and have a broadcast receiver get your return value
+                // to know when to disable/stop the refreshing
+            }
+        });
         return rootView;
 
     }
@@ -106,9 +124,9 @@ public class HomeFragment extends Fragment implements BooksAdapter.BooksAdapterO
 
             @Override
             public int compare(Book a, Book b) {
-                if (a.getPlace().contains(PREFIX) && b.getPlace().contains(PREFIX)) return a.getPlace().compareTo(b.getPlace());
-                if (a.getPlace().contains(PREFIX) && !b.getPlace().contains(PREFIX)) return -1;
-                if (!a.getPlace().contains(PREFIX) && b.getPlace().contains(PREFIX)) return 1;
+                if (AES.decrypt(a.getPlace(), Constants.SECRET_AES_KEY).contains(PREFIX) && AES.decrypt(b.getPlace(), Constants.SECRET_AES_KEY).contains(PREFIX)) return a.getPlace().compareTo(b.getPlace());
+                if (AES.decrypt(a.getPlace(), Constants.SECRET_AES_KEY).contains(PREFIX) && !AES.decrypt(b.getPlace(), Constants.SECRET_AES_KEY).contains(PREFIX)) return -1;
+                if (!AES.decrypt(a.getPlace(), Constants.SECRET_AES_KEY).contains(PREFIX) && AES.decrypt(b.getPlace(), Constants.SECRET_AES_KEY).contains(PREFIX)) return 1;
                 return 0;
             }
         });
