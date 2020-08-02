@@ -57,7 +57,7 @@ public class FavouritesFragment extends Fragment implements
 
         mSetBookCallBack = this;
         mFavouritesViewModel = new ViewModelProvider(this).get(FavouritesViewModel.class);
-        mFavouritesViewModel.getFavourites(getContext()).observe(this, new Observer<List<Favourites>>() {
+        mFavouritesViewModel.getFavourites(getContext()).observe(getViewLifecycleOwner(), new Observer<List<Favourites>>() {
             @Override
             public void onChanged(List<Favourites> favourites) {
                 mPushIds.clear(); //clear old data in list if it exist so we can have updated list with new data
