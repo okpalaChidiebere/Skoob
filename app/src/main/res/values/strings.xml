@@ -60,4 +60,24 @@
     <string name="pref_skoob_false">No</string>
     <string name="appwidget_title_text">SKOOB</string>
     <string name="add_widget">Add widget</string>
+
+    <string name="skoob_image_description">A book Image for sale</string>
+    <!-- Title for Bottom Navigations-->
+    <string name="nav_home">Home</string>
+    <string name="nav_post">Post</string>
+    <string name="nav_account">Account</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- fragment Account Strings -->
+    <string name="account_welcome">Welcome</string>
+
+    <!-- Post form Strings-->
+    <string name="post_add_image">Add Image</string>
+    <string name="post_hint_book_name">Book Name</string>
+    <string name="post_hint_isbn">ISBN Number</string>
+    <string name="post_hint_price">Price</string>
+    <string name="post_hint_dept">Department</string>
+    <string name="post_hint_subject">Subject</string>
+    <string name="post_hint_loc">Location</string>
+    <string name="post_confirm">Confirm</string>
 </resources>

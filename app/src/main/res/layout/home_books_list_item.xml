@@ -24,6 +24,7 @@
             android:layout_marginRight="10dp"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
+            android:contentDescription="@string/skoob_image_description"
             android:src="@drawable/ic_launcher_background"
             app:layout_constraintStart_toEndOf="@+id/guideline"
             app:layout_constraintTop_toTopOf="parent" />

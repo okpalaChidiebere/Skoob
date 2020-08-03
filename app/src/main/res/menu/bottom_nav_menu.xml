@@ -3,22 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/action_home"
-        android:title="Home"
+        android:title="@string/nav_home"
         android:icon="@drawable/baseline_home_24"
         />
 
     <item android:id="@+id/action_post"
-        android:title="Post"
+        android:title="@string/nav_post"
         android:icon="@drawable/baseline_photo_camera_24"
         />
 
     <item android:id="@+id/action_account"
-        android:title="Account"
+        android:title="@string/nav_account"
         android:icon="@drawable/baseline_person_24"
         />
 
     <item android:id="@+id/action_settings"
-        android:title="Settings"
+        android:title="@string/nav_settings"
         android:icon="@drawable/baseline_settings_24"
         />
 

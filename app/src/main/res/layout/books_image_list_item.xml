@@ -8,5 +8,6 @@
         android:layout_width="90dp"
         android:layout_height="90dp"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop"/>
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/skoob_image_description"/>
 </FrameLayout>
