@@ -21,6 +21,9 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true //i exceeded the number of classes in my singleDex file, so i had to allow for more space
         signingConfig signingConfigs.release
+
+        buildConfigField "String", "GEO_API_KEY", GEO_API_KEY
+        buildConfigField "String", "SECRET_AES_KEY", SECRET_AES_KEY
     }
     buildTypes {
         release {
