@@ -2,6 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
+    signingConfigs {
+        release {
+            storePassword 'passwordt'
+            keyAlias = 'okpalaChidiebere'
+            keyPassword 'passwordt'
+            storeFile file('/Users/okpalacollins4/AndroidStudioProjects/Skoob/app/Keystore.jks')
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
     defaultConfig {
@@ -11,7 +19,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        multiDexEnabled true  //i exceeded the number of classes in my singleDex file, so i had to allow for more space
+        multiDexEnabled true //i exceeded the number of classes in my singleDex file, so i had to allow for more space
+        signingConfig signingConfigs.release
     }
     buildTypes {
         release {
